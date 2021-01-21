@@ -1,6 +1,6 @@
 import './styles/index.scss';
 
-import ThreeText from './modules/ThreeText';
+import ThreeSetup from './modules/ThreeSetup';
 
 window.APP = window.APP || {
   devMode: true,
@@ -19,5 +19,5 @@ if (window.APP.devMode) {
 
 Promise.all(readyPromises).then(() => {
   // Initialize custom code…
-  new ThreeText();
+  new ThreeSetup();
 });

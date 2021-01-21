@@ -1,6 +1,6 @@
-# Three.js Text Header
+# ThreeSetup.js glTF Experiments
 
-Three.js experiment with animated text.
+ThreeSetup.js experiment with glTF models.
 
 ## Development
 
