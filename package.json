@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@malven/gui": "^1.4.1",
-    "cannon": "^0.6.2",
+    "cannon-es": "^0.16.0",
     "canvas-sketch-util": "^1.10.0",
     "gsap": "^3.6.0",
     "lodash.debounce": "^4.0.8",

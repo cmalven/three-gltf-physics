@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import debounce from 'lodash.debounce';
-import CANNON from 'cannon';
+import * as CANNON from 'cannon-es';
 
 /**
  * Boilerplate module using THREE.js
