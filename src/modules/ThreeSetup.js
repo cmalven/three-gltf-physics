@@ -49,8 +49,8 @@ class ThreeSetup {
 
     const itemPromises = [
       // 'pizzaBox',
-      'pizza',
-      // 'taco',
+      // 'pizza',
+      'taco',
     ].map(itemName => {
       return new Promise(res => {
         this.loader.load(`/models/${itemName}.glb`, (gltf) => {
@@ -147,12 +147,13 @@ class ThreeSetup {
     light.position.set(-1, 1, 1);
     light.castShadow = true;
     light.shadow.mapSize.set(1024, 1024);
-    light.shadow.camera.far = 15;
-    light.shadow.camera.left = - 7;
-    light.shadow.camera.top = 7;
-    light.shadow.camera.right = 7;
-    light.shadow.camera.bottom = - 7;
+    light.shadow.camera.near = -4;
+    light.shadow.camera.far = 6;
     this.scene.add(light);
+
+    // Camera light helper
+    // const lightCameraHelper = new THREE.CameraHelper(light.shadow.camera);
+    // this.scene.add(lightCameraHelper);
   }
 
   createItems = () => {
@@ -229,16 +230,16 @@ class ThreeSetup {
     this.worldItems.push(itemBody);
 
     // Create the debug item
-    const boxGeometry = new THREE.BoxBufferGeometry(itemWidth, itemHeight, itemDepth);
-    const boxMaterial = new THREE.MeshStandardMaterial({
-      metalness: 0.3,
-      roughness: 0.4,
-      transparent: true,
-      opacity: 0.4,
-    });
-    const debugItem = new THREE.Mesh(boxGeometry, boxMaterial);
-    this.debugItems.push(debugItem);
-    this.scene.add(debugItem);
+    // const boxGeometry = new THREE.BoxBufferGeometry(itemWidth, itemHeight, itemDepth);
+    // const boxMaterial = new THREE.MeshStandardMaterial({
+    //   metalness: 0.3,
+    //   roughness: 0.4,
+    //   transparent: true,
+    //   opacity: 0.4,
+    // });
+    // const debugItem = new THREE.Mesh(boxGeometry, boxMaterial);
+    // this.debugItems.push(debugItem);
+    // this.scene.add(debugItem);
   }
 
   updateItems = () => {
@@ -249,9 +250,9 @@ class ThreeSetup {
       item.quaternion.copy(worldItem.quaternion);
 
       // Debug
-      const debugItem = this.debugItems[idx];
-      debugItem.position.copy(worldItem.position);
-      debugItem.quaternion.copy(worldItem.quaternion);
+      // const debugItem = this.debugItems[idx];
+      // debugItem.position.copy(worldItem.position);
+      // debugItem.quaternion.copy(worldItem.quaternion);
     });
   }
 
