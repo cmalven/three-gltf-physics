@@ -43,6 +43,7 @@ class ThreeSetup {
       bounce: 0.3,
       startY: 10,
       cursorSize: 0.9,
+      scaleRange: 0.4,
       'more food': this.foodSplat,
       reset: this.reset,
     };
@@ -130,6 +131,7 @@ class ThreeSetup {
 
     window.APP.gui.add(this.settings, 'gravity', 0.1, 10).onChange(debounce(this.updateWorld, 300));
     window.APP.gui.add(this.settings, 'bounce', 0.01, 1).onChange(debounce(this.updateWorld, 300));
+    window.APP.gui.add(this.settings, 'scaleRange', 0.01, 3);
 
     window.APP.gui.add(this.settings, 'more food');
     window.APP.gui.add(this.settings, 'reset');
@@ -276,24 +278,28 @@ class ThreeSetup {
   }
 
   createFood = () => {
+    // Set random scale
+    const scale = Math.random() * this.settings.scaleRange + 1;
+
     // Get a random model and clone it
     const itemModel = this.itemModels[Math.floor(Math.random() * this.itemModels.length)];
     const model = itemModel.clone(true);
 
     // Calculate the bounding box and size of the model
     const bbox = new THREE.Box3().setFromObject(model);
-    const itemWidth = (bbox.max.x - bbox.min.x);
-    const itemHeight = (bbox.max.y - bbox.min.y);
-    const itemDepth = (bbox.max.z - bbox.min.z);
+    const itemWidth = (bbox.max.x - bbox.min.x) * scale;
+    const itemHeight = (bbox.max.y - bbox.min.y) * scale;
+    const itemDepth = (bbox.max.z - bbox.min.z) * scale;
 
     // Create the THREE item
     this.threeItems.push(model);
+    model.scale.set(scale, scale, scale);
     this.scene.add(model);
 
     // Create the physics item
     const itemShape = new CANNON.Box(new CANNON.Vec3(itemWidth * 0.5, itemHeight * 0.5, itemDepth * 0.5));
     const itemBody = new CANNON.Body({
-      mass: 1,
+      mass: scale,
       position: new CANNON.Vec3(
         (Math.random() - 0.5) * 5,
         this.settings.startY,
