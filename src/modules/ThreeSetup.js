@@ -124,7 +124,7 @@ class ThreeSetup {
   createGui = () => {
     if (!window.APP.gui) return;
 
-    const folder = window.APP.gui.setFolder('ThreeExample');
+    const folder = window.APP.gui.setFolder('THREE');
     folder.open();
 
     window.APP.gui.add(this.settings, 'gravity', 0.1, 10).onChange(debounce(this.updateWorld, 300));

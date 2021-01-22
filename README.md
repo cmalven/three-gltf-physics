@@ -1,6 +1,6 @@
-# ThreeSetup.js glTF Experiments
+# Three.js glTF Physics
 
-ThreeSetup.js experiment with glTF models.
+Experiment with Three.js + Cannon.js physics + glTF model imports.
 
 ## Development
 
