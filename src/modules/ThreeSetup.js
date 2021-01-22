@@ -43,6 +43,7 @@ class ThreeSetup {
       bounce: 0.3,
       startY: 10,
       cursorSize: 0.9,
+      'more food': this.foodSplat,
       reset: this.reset,
     };
 
@@ -130,6 +131,7 @@ class ThreeSetup {
     window.APP.gui.add(this.settings, 'gravity', 0.1, 10).onChange(debounce(this.updateWorld, 300));
     window.APP.gui.add(this.settings, 'bounce', 0.01, 1).onChange(debounce(this.updateWorld, 300));
 
+    window.APP.gui.add(this.settings, 'more food');
     window.APP.gui.add(this.settings, 'reset');
   }
 
@@ -257,12 +259,21 @@ class ThreeSetup {
     this.scene.add(this.cursorMesh);
 
     // Food items
-    window.setInterval(this.createFood, 200);
+    window.setInterval(() => {
+      if (this.threeItems.length >= this.settings.maxItemCount) return;
+      this.createFood();
+    }, 200);
+  }
+
+  foodSplat = () => {
+    const numFood = 30;
+    const delay = 150;
+    for (let idx = 0, length = numFood; idx < length; idx++) {
+      window.setTimeout(this.createFood, delay * idx);
+    }
   }
 
   createFood = () => {
-    if (this.threeItems.length >= this.settings.maxItemCount) return;
-
     // Get a random model and clone it
     const itemModel = this.itemModels[Math.floor(Math.random() * this.itemModels.length)];
     const model = itemModel.clone(true);
