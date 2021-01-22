@@ -49,8 +49,11 @@ class ThreeSetup {
 
     const itemPromises = [
       // 'pizzaBox',
-      // 'pizza',
+      'pizza',
       'taco',
+      'sub',
+      'bottleKetchup',
+      'bottleMusterd',
     ].map(itemName => {
       return new Promise(res => {
         this.loader.load(`/models/${itemName}.glb`, (gltf) => {
@@ -77,7 +80,7 @@ class ThreeSetup {
 
   createWorld = () => {
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -9.82, 0);
+    this.world.gravity.set(0, -8, 0);
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
 
     // Physics Materials
@@ -159,7 +162,7 @@ class ThreeSetup {
   createItems = () => {
     // Floor
     this.floor = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(10, 10),
+      new THREE.PlaneBufferGeometry(20, 20),
       new THREE.MeshStandardMaterial({
         color: '#ffffff',
         metalness: 0.01,
@@ -226,6 +229,7 @@ class ThreeSetup {
       ),
       shape: itemShape,
     });
+    itemBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-Math.random(), 0, 0), Math.PI * 0.5);
     this.world.addBody(itemBody);
     this.worldItems.push(itemBody);
 
