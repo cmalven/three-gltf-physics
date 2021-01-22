@@ -22,6 +22,8 @@ class ThreeSetup {
     this.loader;
     this.controls;
     this.floor;
+    this.cursorMesh;
+    this.cursorBody;
     this.itemModel;
     this.clock;
     this.itemModels = [];
@@ -29,15 +31,27 @@ class ThreeSetup {
     this.worldItems = [];
     this.debugItems = [];
 
+    this.mouse = new THREE.Vector2();
+
     // Settings
     this.settings = {
       cameraDistance: 5,
-      scalePeriod: 500,
       bgColor: 0xeeeeee,
       maxItemCount: 100,
+      startY: 10,
+      cursorSize: 0.9,
+      reset: this.reset,
     };
 
     this.init();
+  }
+
+  reset = () => {
+    this.worldItems.forEach(item => {
+      item.position.y = this.settings.startY + Math.random() * this.settings.startY * 2;
+      item.position.x = (Math.random() - 0.5) * 5;
+      item.position.z = (Math.random() - 0.5) * 5;
+    });
   }
 
   init = () => {
@@ -65,7 +79,15 @@ class ThreeSetup {
 
     Promise.all(itemPromises).then(() => {
       this.createItems();
+      this.addEvents();
       this.update();
+    });
+  }
+
+  addEvents = () => {
+    window.addEventListener('mousemove', evt => {
+      this.mouse.x = evt.clientX / this.appContainer.offsetWidth * 2 - 1;
+      this.mouse.y = - (evt.clientY / this.appContainer.offsetHeight) * 2 + 1;
     });
   }
 
@@ -75,7 +97,7 @@ class ThreeSetup {
     const folder = window.APP.gui.setFolder('ThreeExample');
     folder.open();
 
-    window.APP.gui.add(this.settings, 'scalePeriod', 1, 1000);
+    window.APP.gui.add(this.settings, 'reset');
   }
 
   createWorld = () => {
@@ -105,6 +127,14 @@ class ThreeSetup {
     floorBody.addShape(floorShape);
     floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5);
     this.world.addBody(floorBody);
+
+    // Physics cursor
+    const cursorShape = new CANNON.Sphere(this.settings.cursorSize);
+    this.cursorBody = new CANNON.Body();
+    this.cursorBody.mass = 0;
+    // this.cursorBody.position.y = 1;
+    this.cursorBody.addShape(cursorShape);
+    this.world.addBody(this.cursorBody);
   }
 
   createApp = () => {
@@ -157,6 +187,10 @@ class ThreeSetup {
     // Camera light helper
     // const lightCameraHelper = new THREE.CameraHelper(light.shadow.camera);
     // this.scene.add(lightCameraHelper);
+
+    // Raycaster
+    this.raycaster = new THREE.Raycaster();
+
   }
 
   createItems = () => {
@@ -173,6 +207,17 @@ class ThreeSetup {
     this.floor.rotation.x = - Math.PI * 0.5;
     this.floor.receiveShadow = true;
     this.scene.add(this.floor);
+
+    // Create the cursor
+    const cursorGeometry = new THREE.SphereBufferGeometry(this.settings.cursorSize, 20, 20);
+    const cursorMaterial = new THREE.MeshStandardMaterial({
+      metalness: 0.3,
+      roughness: 0.4,
+      transparent: true,
+      opacity: 0.1,
+    });
+    this.cursorMesh = new THREE.Mesh(cursorGeometry, cursorMaterial);
+    this.scene.add(this.cursorMesh);
 
     // Food items
     window.setInterval(this.createFood, 200);
@@ -224,7 +269,7 @@ class ThreeSetup {
       mass: 1,
       position: new CANNON.Vec3(
         (Math.random() - 0.5) * 5,
-        10,
+        this.settings.startY,
         (Math.random() - 0.5) * 5,
       ),
       shape: itemShape,
@@ -247,6 +292,10 @@ class ThreeSetup {
   }
 
   updateItems = () => {
+    // Physics cursor
+    this.cursorMesh.position.copy(this.cursorBody.position);
+    this.cursorMesh.quaternion.copy(this.cursorBody.quaternion);
+
     // Update physics items
     this.threeItems.forEach((item, idx) => {
       const worldItem = this.worldItems[idx];
@@ -260,10 +309,24 @@ class ThreeSetup {
     });
   }
 
+  updateMouseRays = () => {
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    const intersects = this.raycaster.intersectObject(this.floor);
+
+    for(const intersect of intersects) {
+      this.cursorBody.position.x = intersect.point.x;
+      this.cursorBody.position.z = intersect.point.z;
+    }
+  }
+
   update = () => {
     const elapsedTime = this.clock.getElapsedTime();
     const deltaTime = elapsedTime - this.oldElapsedTime;
     this.oldElapsedTime = elapsedTime;
+
+    // Update mouserays
+    this.updateMouseRays();
 
     // Update physics world
     this.world.step(1 / 60, deltaTime, 3);
