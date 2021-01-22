@@ -74,6 +74,7 @@ class ThreeSetup {
     ].map(itemName => {
       return new Promise(res => {
         this.loader.load(`/models/${itemName}.glb`, (gltf) => {
+          this.prepModel(gltf.scene);
           this.itemModels.push(gltf.scene);
           res();
         });
@@ -85,6 +86,32 @@ class ThreeSetup {
       this.addEvents();
       this.update();
     });
+  }
+
+  prepModel = (gltfModel) => {
+    const recursivelyUpdateModelChildren = child => {
+      if (child.material) {
+        child.material.metalness = 0;
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+
+      if (child.children) {
+        child.children.forEach(recursivelyUpdateModelChildren);
+      }
+    };
+
+    // Adjust model so that it is centered at 0, 0
+    const modelChild = gltfModel.children[0];
+    const childBox = new THREE.Box3().setFromObject(modelChild);
+    const childBoxCenter = childBox.getCenter(new THREE.Vector3());
+    modelChild.position.set(
+      modelChild.position.x - childBoxCenter.x,
+      modelChild.position.y - childBoxCenter.y,
+      modelChild.position.z - childBoxCenter.z
+    );
+
+    recursivelyUpdateModelChildren(gltfModel);
   }
 
   addEvents = () => {
@@ -236,31 +263,9 @@ class ThreeSetup {
   createFood = () => {
     if (this.threeItems.length >= this.settings.maxItemCount) return;
 
-    const recurseChildren = child => {
-      if (child.material) {
-        child.material.metalness = 0;
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-
-      if (child.children) {
-        child.children.forEach(recurseChildren);
-      }
-    };
-
     // Get a random model and clone it
     const itemModel = this.itemModels[Math.floor(Math.random() * this.itemModels.length)];
     const model = itemModel.clone(true);
-
-    // Adjust model so that it is centered at 0, 0
-    const modelChild = model.children[0];
-    const childBox = new THREE.Box3().setFromObject(modelChild);
-    const childBoxCenter = childBox.getCenter(new THREE.Vector3());
-    modelChild.position.set(
-      modelChild.position.x - childBoxCenter.x,
-      modelChild.position.y - childBoxCenter.y,
-      modelChild.position.z - childBoxCenter.z
-    );
 
     // Calculate the bounding box and size of the model
     const bbox = new THREE.Box3().setFromObject(model);
@@ -269,7 +274,6 @@ class ThreeSetup {
     const itemDepth = (bbox.max.z - bbox.min.z);
 
     // Create the THREE item
-    recurseChildren(model);
     this.threeItems.push(model);
     this.scene.add(model);
 
