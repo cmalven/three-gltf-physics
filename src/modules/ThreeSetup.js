@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import debounce from 'lodash.debounce';
 import CANNON from 'cannon';
 
 /**
@@ -38,6 +39,8 @@ class ThreeSetup {
       cameraDistance: 5,
       bgColor: 0xeeeeee,
       maxItemCount: 100,
+      gravity: 8,
+      bounce: 0.3,
       startY: 10,
       cursorSize: 0.9,
       reset: this.reset,
@@ -97,12 +100,20 @@ class ThreeSetup {
     const folder = window.APP.gui.setFolder('ThreeExample');
     folder.open();
 
+    window.APP.gui.add(this.settings, 'gravity', 0.1, 10).onChange(debounce(this.updateWorld, 300));
+    window.APP.gui.add(this.settings, 'bounce', 0.01, 1).onChange(debounce(this.updateWorld, 300));
+
     window.APP.gui.add(this.settings, 'reset');
+  }
+
+  updateWorld = () => {
+    this.world.gravity.y = -this.settings.gravity;
+    this.world.defaultContactMaterial.restitution = this.settings.bounce;
   }
 
   createWorld = () => {
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -8, 0);
+    this.world.gravity.set(0, -this.settings.gravity, 0);
     this.world.broadphase = new CANNON.SAPBroadphase(this.world);
 
     // Physics Materials
@@ -114,7 +125,7 @@ class ThreeSetup {
       defaultMaterial,
       {
         friction: 0.1,
-        restitution: 0.3,
+        restitution: this.settings.bounce,
       }
     );
     this.world.addContactMaterial(contactMaterial);
@@ -132,7 +143,6 @@ class ThreeSetup {
     const cursorShape = new CANNON.Sphere(this.settings.cursorSize);
     this.cursorBody = new CANNON.Body();
     this.cursorBody.mass = 0;
-    // this.cursorBody.position.y = 1;
     this.cursorBody.addShape(cursorShape);
     this.world.addBody(this.cursorBody);
   }
