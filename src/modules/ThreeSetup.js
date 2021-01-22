@@ -219,8 +219,10 @@ class ThreeSetup {
     light.position.set(-1, 1, 1);
     light.castShadow = true;
     light.shadow.mapSize.set(1024, 1024);
-    light.shadow.camera.near = -4;
-    light.shadow.camera.far = 6;
+    light.shadow.camera.near = -6;
+    light.shadow.camera.left = -6;
+    light.shadow.camera.right = 6;
+    light.shadow.camera.far = 9;
     this.scene.add(light);
 
     // Camera light helper
